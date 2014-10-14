@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Walking down memory lane (part II) | Yassin java development blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="As per our previous article we identified that we need a way to serialize objects into memory in a very efficient manner. To recap here is a picture showing the steps we need to remove when sending/re">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Walking down memory lane (part II)">
+<meta property="og:url" content="http://yassinm.github.io/2014/09/25/walking-down-memory-lane-02/">
+<meta property="og:site_name" content="Yassin java development blog">
+<meta property="og:description" content="As per our previous article we identified that we need a way to serialize objects into memory in a very efficient manner. To recap here is a picture showing the steps we need to remove when sending/re">
+<meta property="og:image" content="/images/walking-down-memory-lane-02-000.png">
+<meta property="og:image" content="/images/walking-down-memory-lane-02-001.png">
+<meta property="og:image" content="/images/walking-down-memory-lane-02-002.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Walking down memory lane (part II)">
+<meta name="twitter:description" content="As per our previous article we identified that we need a way to serialize objects into memory in a very efficient manner. To recap here is a picture showing the steps we need to remove when sending/re">
+
+  
+    <link rel="alternative" href="/atom.xml" title="Yassin java development blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Yassin java development blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><input type="submit" value="&#xF002;" class="search-form-submit"><input type="hidden" name="q" value="site:http://yassinm.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-walking-down-memory-lane-02" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/09/25/walking-down-memory-lane-02/" class="article-date">
+  <time datetime="2014-09-25T04:00:00.000Z" itemprop="datePublished">Sep 25 2014</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Walking down memory lane (part II)
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>As per our previous <a href="/2014/09/21/walking-down-memory-lane-01">article</a> we identified that we need a way to serialize objects into memory in a very efficient manner. To recap here is a picture showing the steps we need to remove when sending/receiving objects over the network.</p>
+<img src="/images/walking-down-memory-lane-02-000.png" width="300">
+
+<p>FTR we are still not interested in solving how these troublesome bytes are transferred over the network from one process to another once the data is ready to be transferred. For this article we are leaving this aspect aside and will only concentrate on efficiently storing those objects in memory and manipulating them correctly.</p>
+<h2 id="Unsafe_relationships_with_data">Unsafe relationships with data</h2>
+<p>Like we said earlier java has a dark side if you want to really start fiddling with bytes in an unsafe and unprotected manner. This is called (quite rightly) sun.misc.Unsafe. For the gory details i will refer you to this <a href="http://mechanical-sympathy.blogspot.ca/2012/07/native-cc-like-performance-for-java.html" target="_blank" rel="external">article</a>. What we gain immediately by using this unsafe method are :</p>
+<ol>
+<li>We finally have a way of accessing bytes for read and writes purposes directly just like we used to in c/c++. We can also do so very efficiently and in a very high speed manner.</li>
+<li>The code using these objects is not aware of what is happening behind the scene.</li>
+<li>For the sake of cache coherency, it is much better to access the memory in a single stride fashion so that we are not jumping back and forth in memory.</li>
+</ol>
+<h2 id="Hiding_behind_an_interface">Hiding behind an interface</h2>
+<p>What we achieved, instantly, by using the “unsafe” method is a read/write through interface. The block of memory behind the object is effectively  acting as a cache that we use to read/write behind the scene. The fact that we are dealing with unsafe is only an implementation specific issue. All the code using this interface is unaware of what is happening.</p>
+<img src="/images/walking-down-memory-lane-02-001.png" width="480">
+
+<p>This effectively means that the memory backing these objects could come from anywhere in the system ! We are not limited by the limitations of heap memory and its cumbersome garbage collection schemes. The gates are open for an infinite amount of unmanaged off-heap memory !  In fact, we are not even limited by the memory available on the process altogether. We could use a shared memory scheme where all the data could be read/written by a separate locally running process. Or for that matter anything that was published by the kernel in a memory location somewhere on the system !!! As long as we can address the memory in a progressive single stride fashion  we can effectively address anything located locally or somewhere else on the universe. More on this later … </p>
+<h2 id="Sharing_is_messaging_!">Sharing is messaging !</h2>
+<p>As we said above the memory that is living behind the proxy object could also be a shared memory location. As long as we take care of how we are accessing these memory locations concurrently we can effectively send messages between local threads running within the same process !</p>
+<img src="/images/walking-down-memory-lane-02-002.png" width="550">
+
+<p>In the same vein it is not a big stretch to see how this technique could be applied to threads running across a multitude of processes running within the same machine or running on different geographically located data centres as part of a big cluster. It is only a matter of making sure the objects see the exact same data copied verbatim across those process boundaries. The biggest technical hurdle that is left to overcome is the synchronization mechanism we will use to make sure we are accessing these objects safely. Of course it will also have to be a very fast synchronization mechanism or we will lose the benefit of doing all these magical memory fiddling contraptions!</p>
+<p>Furthermore, if we keep accessing memory with the <a href="http://mechanical-sympathy.blogspot.ca/2011/09/single-writer-principle.html" target="_blank" rel="external">Single Writer Principle</a> in mind we might be able to share this memory location with more than one reader in a non contention based fashion. To quote that page ‘On x86/x64 <strong>loads can be re-ordered with older stores</strong> according to the memory model so memory barriers are required when multiple threads mutate the same data across cores. The single writer principle avoids this issue because it never has to deal with writing the latest version of a data item that may have been written by another thread and currently in the store buffer of another core”. But let us not go ahead of ourself here, we are not there yet !</p>
+<p>One thing that you (maybe) missed to notice is that i completely ignored talking about how we were going to turn our objects to memory bytes via the serialization step which we set out to fix in the beginning of this article. As you can see that step is unnecessary since the code using our fine grained fly weight proxy object is directly reading and writing to the bytes locations. As such, when the user code calls the set functions on the proxy object we are technically performing the serialization to memory right away. Vice versa, when the user calls the get functions available on the proxy object they are effectively de-serializing the object from memory. All of the above is done efficiently and with minimal locking involved … Et voila !</p>
+<h2 id="Do_you_know_the_memory_man_?_the_memory_man_?_who_lives_on_Drury_Lane_?">Do you know the memory man ? the memory man ? who lives on Drury Lane ?</h2>
+<p>Now one more little titbit remaining is that the process or thread we are sharing our data with does not have to be written in java at all. It could be written in any language binding that can use our proxy object. It can be in Java,c#,c/c++,erlang, ruby,nodejs, python , php … you name it. It just does not matter at all. Like we said before ,for all intents and purposes , it could be coming from the kernel itself. As long as the memory representation and location is followed we can both communicate over this high speed channel. Imagine a world where you could write your database access in Java and your number crunching in c/c++. And they could be both living within the same process or across from two separate data centers !</p>
+<h2 id="Conclusion">Conclusion</h2>
+<p>We started with solving a simple serialization/de-serialization problem and we are already talking about fixing the inherent communication problems when people want to mix code written for different platforms and with different languages without sacrificing performance. I would say that this side effect is a very beautiful addition to solving our original problem(s). Assuming it works out … obviously !</p>
+<p>Until we get there i can always say that “I have a dream … I have a dream that one day down in a process — with its vicious language base discrimination , with its OS having its lips dripping with the words of interposition and nullification — one day right there in a process, little java boys and c# girls will be able to join hands with little c/c++ boys and ruby girls as sisters and brothers. I have a dream that one day every valley shall be exalted, and every hill and mountain shall be made low. The rough places will be plain and the crooked places will be made straight, and the glory of all languages shall be revealed”</p>
+<p>So stay tuned for that dream to come true !</p>
+<!-- 
+The barrier to communication between processes/threads written in different languages has never been a technical one. It has always been, as far as i can remember, based on a lock in to a particular platform and very rigid architectures that was limiting in its acceptance of foreign languages.
+
+[Part I](/2014/09/21/walking-down-memory-lane-01)
+[Part II](/2014/09/25/walking-down-memory-lane-02)
+[Part III](/2014/10/06/walking-down-memory-lane-03)
+
+
+-->
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yassinm.github.io/2014/09/25/walking-down-memory-lane-02/" data-id="wm4i9h4f8vjhm4e5" class="article-share-link">Share</a>
+      
+        <a href="http://yassinm.github.io/2014/09/25/walking-down-memory-lane-02/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java/">java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/memory/">memory</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/10/06/walking-down-memory-lane-03/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Walking down memory lane (part III)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/09/21/walking-down-memory-lane-01/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Walking down memory lane (part I)</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2014/10/06/walking-down-memory-lane-03/">Walking down memory lane (part III)</a>
+          </li>
+        
+          <li>
+            <a href="/2014/09/25/walking-down-memory-lane-02/">Walking down memory lane (part II)</a>
+          </li>
+        
+          <li>
+            <a href="/2014/09/21/walking-down-memory-lane-01/">Walking down memory lane (part I)</a>
+          </li>
+        
+          <li>
+            <a href="/2013/07/13/first-post/">Starting to blog ... finally</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/memory/">memory</a><span class="tag-list-count">3</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/java/" style="font-size: NaNpx;">java</a><a href="/tags/memory/" style="font-size: NaNpx;">memory</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/10/">October 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/09/">September 2014</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/07/">July 2013</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2014 Ymo<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+<script>
+  var disqus_shortname = 'yassinm';
+  
+  var disqus_url = 'http://yassinm.github.io/2014/09/25/walking-down-memory-lane-02/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+
+  </div>
+</body>
+</html>
