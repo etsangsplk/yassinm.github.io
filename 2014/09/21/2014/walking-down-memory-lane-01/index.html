@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <meta charset="utf-8">
+    
+    <title>Walking down memory lane (part 1) | yassinm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="One of the topics that you often have to deal with in java, especially in high performance and low latency distributed code, is how you send a set of objects to a worker thread in the most efficient m">
+<meta name="keywords" content="java,memory">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Walking down memory lane (part 1)">
+<meta property="og:url" content="http://yoursite.com/2014/09/21/2014/walking-down-memory-lane-01/index.html">
+<meta property="og:site_name" content="yassinm">
+<meta property="og:description" content="One of the topics that you often have to deal with in java, especially in high performance and low latency distributed code, is how you send a set of objects to a worker thread in the most efficient m">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2017-08-06T18:13:02.424Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Walking down memory lane (part 1)">
+<meta name="twitter:description" content="One of the topics that you often have to deal with in java, especially in high performance and low latency distributed code, is how you send a set of objects to a worker thread in the most efficient m">
+    
+
+    
+
+    
+
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/libs/open-sans/styles.css">
+    <link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <script src="/libs/jquery/2.1.3/jquery.min.js"></script>
+    
+    
+    
+    
+    
+    
+
+
+</head>
+
+<body>
+    <div id="container">
+        <header id="header">
+    <div id="header-main" class="header-inner">
+        <div class="outer">
+            <a href="/" id="logo">
+                <i class="logo"></i>
+                <span class="site-title">yassinm</span>
+            </a>
+            <nav id="main-nav">
+                
+                    <a class="main-nav-link" href="/.">Home</a>
+                
+                    <a class="main-nav-link" href="/archives">Archives</a>
+                
+                    <a class="main-nav-link" href="/about">About</a>
+                
+            </nav>
+            
+                
+                <nav id="sub-nav">
+                    <div class="profile" id="profile-nav">
+                        <a id="profile-anchor" href="javascript:;">
+                            <img class="avatar" src="/css/images/M-Cyk09B_400x400.jpg" />
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+                    </div>
+                </nav>
+            
+            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="Type something..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: 'Posts',
+            PAGES: 'Pages',
+            CATEGORIES: 'Categories',
+            TAGS: 'Tags',
+            UNTITLED: '(Untitled)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+<script src="/js/insight.js"></script>
+
+</div>
+        </div>
+    </div>
+    <div id="main-nav-mobile" class="header-sub header-inner">
+        <table class="menu outer">
+            <tr>
+                
+                    <td><a class="main-nav-link" href="/.">Home</a></td>
+                
+                    <td><a class="main-nav-link" href="/archives">Archives</a></td>
+                
+                    <td><a class="main-nav-link" href="/about">About</a></td>
+                
+                <td>
+                    
+    <div class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="Search" />
+    </div>
+
+                </td>
+            </tr>
+        </table>
+    </div>
+</header>
+
+        <div class="outer">
+            
+                
+
+<aside id="profile">
+    <div class="inner profile-inner">
+        <div class="base-info profile-block">
+            <img id="avatar" src="/css/images/M-Cyk09B_400x400.jpg" />
+            <h2 id="name">Yassin Mohamed</h2>
+            <h3 id="title">Father , Husband</h3>
+            <span id="location"><i class="fa fa-map-marker"></i>Ottawa, Canada</span>
+            <a id="follow" target="_blank" href="https://twitter.com/yassinm_tw">FOLLOW</a>
+        </div>
+        <div class="article-info profile-block">
+            <div class="article-info-block">
+                4
+                <span>posts</span>
+            </div>
+            <div class="article-info-block">
+                2
+                <span>tags</span>
+            </div>
+        </div>
+        
+        <div class="profile-block social-links">
+            <table>
+                <tr>
+                    
+                    
+                    <td>
+                        <a href="https://github.com/yassinm" target="_blank" title="github" class=tooltip>
+                            <i class="fa fa-github"></i>
+                        </a>
+                    </td>
+                    
+                    <td>
+                        <a href="https://twitter.com/yassinm_tw" target="_blank" title="twitter" class=tooltip>
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                    </td>
+                    
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</aside>
+
+            
+            <section id="main"><article id="post-2014/walking-down-memory-lane-01" class="article article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+            Walking down memory lane (part 1)
+        </h1>
+    
+
+                
+                    <div class="article-meta">
+                        
+    <div class="article-date">
+        <i class="fa fa-calendar"></i>
+        <a href="/2014/09/21/2014/walking-down-memory-lane-01/">
+            <time datetime="2014-09-21T04:00:00.000Z" itemprop="datePublished">2014-09-21</time>
+        </a>
+    </div>
+
+
+                        
+                        
+    <div class="article-tag">
+        <i class="fa fa-tag"></i>
+        <a class="tag-link" href="/tags/java/">java</a>, <a class="tag-link" href="/tags/memory/">memory</a>
+    </div>
+
+                    </div>
+                
+            </header>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+        
+            
+            <p>One of the topics that you often have to deal with in java, especially in high performance and low latency distributed code, is how you send a set of objects to a worker thread in the most efficient manner. This thread could be running in the same process or on a completely separate machine located somewhere else in your network. This has always been the case for people coming from a c/c++ environment even before the advent of Java. However, Java has steadily gained so much in performance and JIT improvements over the years that nowadays it is on par , in some areas, with c/c++. This of course does not come free and requires a very careful design and a very good understanding of current IPC mechanisms. Moreover, some of the new techniques involving Off-heap memory allocations and lock free queues can even go further. As always, the devil is in the details. In this post i will try to first look at how you can pass data efficiently between different threads/processes and the different issues we have to solve when dealing with the java language.</p>
+<h2 id="Serializing-de-serializing"><a href="#Serializing-de-serializing" class="headerlink" title="Serializing/de-serializing"></a>Serializing/de-serializing</h2><p>If you want to pass around a block of memory in c/c++ all you need to do on the receiving side is cast the actual memory location to a particular structure and you immediately get an object you can play with. At your own risk of course! This scenario is similar to having all your belts off while driving a formula one vehicle and going the wrong way on a high speed lane … Other cars coming at you being the data that was sent to you. This is why you can refer to this practice as having “unsafe” relations with your data! On the flip side, this does not mean the code receiving the data has to be running within the same process. It could be running somewhere else in the universe as long as the actual data was transported successfully! You still have to take care of the normal Endian-ness of the platform, which is obviously also needed in Java, but that is all that’s required. Technically speaking, there is no need for serialization/de-serialization required since the actual objects are already in bytes format. Unfortunately, we do not have the luxury of these dangerous “Shoot my own feet features” practices in Java. That is, unless you turn yourself into the dark side by using the famously unsafe using sun.misc.Unsafe ! More on this later…</p>
+<p>In java , when you pass objects around between threads within the same process you can get away by only passing the reference to the actual object. Obviously, you will have to take great care when the passed object is accessed concurrently across the multiple threads in your process. You can deal with issues like this by implementing one of the concurrent access mechanisms available in the JVM. The problem however comes when your target thread is running in a separate process. In that scenario you need a way of serializing/de-serializing the objects before and after they hit the wire. This ,dealing with objects back and forth, becomes very cumbersome suddenly.</p>
+<p>The above additional complexity stems from the fact that we do not have (yet) a way to deal with arrays of structures in java as we do in c/c++. We basically can’t have “unsafe” relations with our data. All objects , including arrays of all types, are passed by reference. As such these objects must all live in the heap and are all susceptible for garbage collection. This basically means that anything you get from the wire has to be “transformed” into actual objects before they are ready for consumption. Lately, the growing majority experience this aspect in Java when dealing with Restful services. An object is first serialized into JSON , sent over the wire via a transport protocol, and then de-serialized when it arrives at its destination before it is passed to the upper application specific code. The simpler the object the easier it is to perform those steps and the faster the overall code becomes. I will not bore you with the multiple technologies available in that arena but i will point you to this comparison.</p>
+<h2 id="Memory-control"><a href="#Memory-control" class="headerlink" title="Memory control"></a>Memory control</h2><p>Unfortunately, there is no particular way one can instruct the JVM on how objects are stored and how they are placed in memory in contiguous or non contiguous fashion. As far as the general programmer is concerned these pesky details are what make the platform “safe”. As such, these details are considered irrelevant for the majority of use cases. This is exactly why it is not needed for a lot of users. The exception is when your code needs to deal with performance critical access to very large amount of objects and you need to have a good control on how these particular objects are stored in memory efficiently. .</p>
+<p>Furthermore, the access pattern across different threads and cores accessing the actual fields in your objects can also be problematic. False sharing explained here and here is a very good case on why it is important to know your memory layout in a performance critical code. Again this is not for everyone! But you can still see why it is imperative to understand the concepts involved when you need to write performance critical code.</p>
+<p>To make things even more complicated there is no “traditional” way in Java on how you access bytes directly as soon as they are off the network in a zero copy fashion. Once you get data in a NIC buffer the application has to go through a context switch before data is available in user land. The same thing happens when the bytes are on their way out. There are commercial libraries/hardware to do these but so far this not part of the things available out of the box and definitely not for “free” !</p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>You would think that someone has already worked out the details for most of these issues and came up with a clean and simplistic way , ala Corba style, for you to send data across different threads/processes and with high speed. Fortunately there are some outstanding libraries out there we will explore in our next articles, but you still have to understand these complexities yourself and you still need to be in the know. Ergo, the need for this first part covering the basics!</p>
+<p>To conclude i will say that we need to figure a way to:</p>
+<p>Turn objects to bytes (and vice versa) in a very high speed fashion<br>Make sure we have a good control on how the memory is been used even in java.<br>The above outlines only some of the issues i can think of right now. To me these issues constitute a list of requirements i would want my high speed serializing/de-serializing code to deal with. Do i hear a future framework in java in the horizon that would solve (most of) these issues … that’s a “definite maybe” so stay tuned!</p>
+
+        
+        </div>
+        <footer class="article-footer">
+            <div class="share-container">
+
+
+
+</div>
+
+    <a data-url="http://yoursite.com/2014/09/21/2014/walking-down-memory-lane-01/" data-id="cj612wo0b00010pgm105oju9f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+<script>
+    (function ($) {
+        // Prevent duplicate binding
+        if (typeof(__SHARE_BUTTON_BINDED__) === 'undefined' || !__SHARE_BUTTON_BINDED__) {
+            __SHARE_BUTTON_BINDED__ = true;
+        } else {
+            return;
+        }
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="fa fa-twitter article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="fa fa-facebook article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="fa fa-pinterest article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="fa fa-google article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+            
+    
+
+        </footer>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2014/09/25/2014/walking-down-memory-lane-02/" id="article-nav-newer" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Newer</strong>
+            <div class="article-nav-title">
+                
+                    Walking down memory lane (part 2)
+                
+            </div>
+        </a>
+    
+    
+        <a href="/2013/07/13/2013/first-post/" id="article-nav-older" class="article-nav-link-wrap">
+            <strong class="article-nav-caption">Older</strong>
+            <div class="article-nav-title">Starting to blog ... finally</div>
+        </a>
+    
+</nav>
+
+
+    
+</article>
+
+
+    
+    
+        <section id="comments">
+	<div id="commentContainer"></div>
+</section>
+    
+
+</section>
+            
+                
+<aside id="sidebar">
+   
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">recent</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2014/10/06/2014/walking-down-memory-lane-03/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/images/walking-down-memory-lane-03-000.png)" alt="Walking down memory lane (part 3)" class="thumbnail-image"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2014/10/06/2014/walking-down-memory-lane-03/" class="title">Walking down memory lane (part 3)</a></p>
+                            <p class="item-date"><time datetime="2014-10-06T04:00:00.000Z" itemprop="datePublished">2014-10-06</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2014/09/25/2014/walking-down-memory-lane-02/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/images/walking-down-memory-lane-02-000.png)" alt="Walking down memory lane (part 2)" class="thumbnail-image"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2014/09/25/2014/walking-down-memory-lane-02/" class="title">Walking down memory lane (part 2)</a></p>
+                            <p class="item-date"><time datetime="2014-09-25T04:00:00.000Z" itemprop="datePublished">2014-09-25</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2014/09/21/2014/walking-down-memory-lane-01/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2014/09/21/2014/walking-down-memory-lane-01/" class="title">Walking down memory lane (part 1)</a></p>
+                            <p class="item-date"><time datetime="2014-09-21T04:00:00.000Z" itemprop="datePublished">2014-09-21</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2013/07/13/2013/first-post/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2013/07/13/2013/first-post/" class="title">Starting to blog ... finally</a></p>
+                            <p class="item-date"><time datetime="2013-07-13T04:00:00.000Z" itemprop="datePublished">2013-07-13</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">tags</h3>
+        <div class="widget">
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/memory/">memory</a><span class="tag-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+    
+        
+    <div class="widget-wrap">
+        <h3 class="widget-title">archives</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/10/">October 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/09/">September 2014</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/07/">July 2013</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+    
+    <div id="toTop" class="fa fa-angle-up"></div>
+</aside>
+
+            
+        </div>
+        <footer id="footer">
+    <div class="outer">
+        <div id="footer-info" class="inner">
+            &copy; 2017 Yassin Mohamed<br>
+            Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="http://github.com/ppoffice">PPOffice</a>
+        </div>
+    </div>
+</footer>
+        
+
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+<script src="/js/main.js"></script>
+
+    </div>
+</body>
+</html>
