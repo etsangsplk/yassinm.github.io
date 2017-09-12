@@ -9,11 +9,11 @@
 <meta name="keywords" content="java,memory">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Walking down memory lane (part 1)">
-<meta property="og:url" content="http://yoursite.com/2014/09/21/2014/walking-down-memory-lane-01/index.html">
+<meta property="og:url" content="http://yoursite.com/21/09/2014/walking-down-memory-lane-01/index.html">
 <meta property="og:site_name" content="yassinm">
 <meta property="og:description" content="One of the topics that you often have to deal with in java, especially in high performance and low latency distributed code, is how you send a set of objects to a worker thread in the most efficient m">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2017-08-06T18:13:02.424Z">
+<meta property="og:updated_time" content="2017-09-12T15:07:10.917Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Walking down memory lane (part 1)">
 <meta name="twitter:description" content="One of the topics that you often have to deal with in java, especially in high performance and low latency distributed code, is how you send a set of objects to a worker thread in the most efficient m">
@@ -145,11 +145,11 @@
         </div>
         <div class="article-info profile-block">
             <div class="article-info-block">
-                4
+                6
                 <span>posts</span>
             </div>
             <div class="article-info-block">
-                2
+                3
                 <span>tags</span>
             </div>
         </div>
@@ -196,7 +196,7 @@
                         
     <div class="article-date">
         <i class="fa fa-calendar"></i>
-        <a href="/2014/09/21/2014/walking-down-memory-lane-01/">
+        <a href="/21/09/2014/walking-down-memory-lane-01/">
             <time datetime="2014-09-21T04:00:00.000Z" itemprop="datePublished">2014-09-21</time>
         </a>
     </div>
@@ -218,7 +218,7 @@
         
             
             <p>One of the topics that you often have to deal with in java, especially in high performance and low latency distributed code, is how you send a set of objects to a worker thread in the most efficient manner. This thread could be running in the same process or on a completely separate machine located somewhere else in your network. This has always been the case for people coming from a c/c++ environment even before the advent of Java. However, Java has steadily gained so much in performance and JIT improvements over the years that nowadays it is on par , in some areas, with c/c++. This of course does not come free and requires a very careful design and a very good understanding of current IPC mechanisms. Moreover, some of the new techniques involving Off-heap memory allocations and lock free queues can even go further. As always, the devil is in the details. In this post i will try to first look at how you can pass data efficiently between different threads/processes and the different issues we have to solve when dealing with the java language.</p>
-<h2 id="Serializing-de-serializing"><a href="#Serializing-de-serializing" class="headerlink" title="Serializing/de-serializing"></a>Serializing/de-serializing</h2><p>If you want to pass around a block of memory in c/c++ all you need to do on the receiving side is cast the actual memory location to a particular structure and you immediately get an object you can play with. At your own risk of course! This scenario is similar to having all your belts off while driving a formula one vehicle and going the wrong way on a high speed lane … Other cars coming at you being the data that was sent to you. This is why you can refer to this practice as having “unsafe” relations with your data! On the flip side, this does not mean the code receiving the data has to be running within the same process. It could be running somewhere else in the universe as long as the actual data was transported successfully! You still have to take care of the normal Endian-ness of the platform, which is obviously also needed in Java, but that is all that’s required. Technically speaking, there is no need for serialization/de-serialization required since the actual objects are already in bytes format. Unfortunately, we do not have the luxury of these dangerous “Shoot my own feet features” practices in Java. That is, unless you turn yourself into the dark side by using the famously unsafe using sun.misc.Unsafe ! More on this later…</p>
+<h2 id="Serializing-de-serializing"><a href="#Serializing-de-serializing" class="headerlink" title="Serializing/de-serializing"></a>Serializing/de-serializing</h2><p>If you want to pass around a block of memory in c/c++ all you need to do on the receiving side is cast the actual memory location to a particular structure and you immediately get an object you can play with. At your own risk of course! This scenario is similar to having all your belts off while driving a formula one vehicle and going the wrong way on a high speed lane … Other cars coming at you being the data that was sent to you. This is why you can refer to this practice as having “unsafe” relations with your data! On the flip side, this does not mean the code receiving the data has to be running within the same process. It could be running somewhere else in the universe as long as the actual data was transported successfully! You still have to take care of the normal Endian-ness of the platform, which is obviously also needed in Java, but that is all that’s required. Technically speaking, there is no need for serialization/de-serialization required since the actual objects are already in bytes format. Unfortunately, we do not have the luxury of these dangerous “Shoot my own feet features” practices in Java. That is, unless you turn yourself into the dark side by using the famously unsafe using sun.misc.Unsafe ! More on this later …</p>
 <p>In java , when you pass objects around between threads within the same process you can get away by only passing the reference to the actual object. Obviously, you will have to take great care when the passed object is accessed concurrently across the multiple threads in your process. You can deal with issues like this by implementing one of the concurrent access mechanisms available in the JVM. The problem however comes when your target thread is running in a separate process. In that scenario you need a way of serializing/de-serializing the objects before and after they hit the wire. This ,dealing with objects back and forth, becomes very cumbersome suddenly.</p>
 <p>The above additional complexity stems from the fact that we do not have (yet) a way to deal with arrays of structures in java as we do in c/c++. We basically can’t have “unsafe” relations with our data. All objects , including arrays of all types, are passed by reference. As such these objects must all live in the heap and are all susceptible for garbage collection. This basically means that anything you get from the wire has to be “transformed” into actual objects before they are ready for consumption. Lately, the growing majority experience this aspect in Java when dealing with Restful services. An object is first serialized into JSON , sent over the wire via a transport protocol, and then de-serialized when it arrives at its destination before it is passed to the upper application specific code. The simpler the object the easier it is to perform those steps and the faster the overall code becomes. I will not bore you with the multiple technologies available in that arena but i will point you to this comparison.</p>
 <h2 id="Memory-control"><a href="#Memory-control" class="headerlink" title="Memory control"></a>Memory control</h2><p>Unfortunately, there is no particular way one can instruct the JVM on how objects are stored and how they are placed in memory in contiguous or non contiguous fashion. As far as the general programmer is concerned these pesky details are what make the platform “safe”. As such, these details are considered irrelevant for the majority of use cases. This is exactly why it is not needed for a lot of users. The exception is when your code needs to deal with performance critical access to very large amount of objects and you need to have a good control on how these particular objects are stored in memory efficiently. .</p>
@@ -237,7 +237,7 @@
 
 </div>
 
-    <a data-url="http://yoursite.com/2014/09/21/2014/walking-down-memory-lane-01/" data-id="cj612wo0b00010pgm105oju9f" class="article-share-link"><i class="fa fa-share"></i>Share</a>
+    <a data-url="http://yoursite.com/21/09/2014/walking-down-memory-lane-01/" data-id="cj7hqnvvy0001xsgm6ghgbuj0" class="article-share-link"><i class="fa fa-share"></i>Share</a>
 <script>
     (function ($) {
         // Prevent duplicate binding
@@ -312,7 +312,7 @@
         
 <nav id="article-nav">
     
-        <a href="/2014/09/25/2014/walking-down-memory-lane-02/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/25/09/2014/walking-down-memory-lane-02/" id="article-nav-newer" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Newer</strong>
             <div class="article-nav-title">
                 
@@ -322,7 +322,7 @@
         </a>
     
     
-        <a href="/2013/07/13/2013/first-post/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/13/07/2013/first-post/" id="article-nav-older" class="article-nav-link-wrap">
             <strong class="article-nav-caption">Older</strong>
             <div class="article-nav-title">Starting to blog ... finally</div>
         </a>
@@ -355,7 +355,45 @@
                     <li>
                         
                         <div class="item-thumbnail">
-                            <a href="/2014/10/06/2014/walking-down-memory-lane-03/" class="thumbnail">
+                            <a href="/08/09/2017/wiring-data-transformations-for-speed-02/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/images/wiring-data-transformations-for-speed-002.png)" alt="Wiring data transformations for speed (part 2)" class="thumbnail-image"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/08/09/2017/wiring-data-transformations-for-speed-02/" class="title">Wiring data transformations for speed (part 2)</a></p>
+                            <p class="item-date"><time datetime="2017-09-08T04:00:00.000Z" itemprop="datePublished">2017-09-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/07/09/2017/wiring-data-transformations-for-speed-01/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/images/wiring-data-transformations-for-speed-001.thumb.png)" alt="Wiring data transformations for speed (part 1)" class="thumbnail-image"></span>
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/07/09/2017/wiring-data-transformations-for-speed-01/" class="title">Wiring data transformations for speed (part 1)</a></p>
+                            <p class="item-date"><time datetime="2017-09-07T04:00:00.000Z" itemprop="datePublished">2017-09-07</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/06/10/2014/walking-down-memory-lane-03/" class="thumbnail">
     
     
         <span style="background-image:url(/images/walking-down-memory-lane-03-000.png)" alt="Walking down memory lane (part 3)" class="thumbnail-image"></span>
@@ -366,7 +404,7 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2014/10/06/2014/walking-down-memory-lane-03/" class="title">Walking down memory lane (part 3)</a></p>
+                            <p class="item-title"><a href="/06/10/2014/walking-down-memory-lane-03/" class="title">Walking down memory lane (part 3)</a></p>
                             <p class="item-date"><time datetime="2014-10-06T04:00:00.000Z" itemprop="datePublished">2014-10-06</time></p>
                         </div>
                     </li>
@@ -374,7 +412,7 @@
                     <li>
                         
                         <div class="item-thumbnail">
-                            <a href="/2014/09/25/2014/walking-down-memory-lane-02/" class="thumbnail">
+                            <a href="/25/09/2014/walking-down-memory-lane-02/" class="thumbnail">
     
     
         <span style="background-image:url(/images/walking-down-memory-lane-02-000.png)" alt="Walking down memory lane (part 2)" class="thumbnail-image"></span>
@@ -385,7 +423,7 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2014/09/25/2014/walking-down-memory-lane-02/" class="title">Walking down memory lane (part 2)</a></p>
+                            <p class="item-title"><a href="/25/09/2014/walking-down-memory-lane-02/" class="title">Walking down memory lane (part 2)</a></p>
                             <p class="item-date"><time datetime="2014-09-25T04:00:00.000Z" itemprop="datePublished">2014-09-25</time></p>
                         </div>
                     </li>
@@ -393,7 +431,7 @@
                     <li>
                         
                         <div class="item-thumbnail">
-                            <a href="/2014/09/21/2014/walking-down-memory-lane-01/" class="thumbnail">
+                            <a href="/21/09/2014/walking-down-memory-lane-01/" class="thumbnail">
     
     
         <span class="thumbnail-image thumbnail-none"></span>
@@ -404,27 +442,8 @@
                         
                         <div class="item-inner">
                             <p class="item-category"></p>
-                            <p class="item-title"><a href="/2014/09/21/2014/walking-down-memory-lane-01/" class="title">Walking down memory lane (part 1)</a></p>
+                            <p class="item-title"><a href="/21/09/2014/walking-down-memory-lane-01/" class="title">Walking down memory lane (part 1)</a></p>
                             <p class="item-date"><time datetime="2014-09-21T04:00:00.000Z" itemprop="datePublished">2014-09-21</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2013/07/13/2013/first-post/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2013/07/13/2013/first-post/" class="title">Starting to blog ... finally</a></p>
-                            <p class="item-date"><time datetime="2013-07-13T04:00:00.000Z" itemprop="datePublished">2013-07-13</time></p>
                         </div>
                     </li>
                 
@@ -437,7 +456,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">tags</h3>
         <div class="widget">
-            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/memory/">memory</a><span class="tag-list-count">3</span></li></ul>
+            <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/data-flow/">data flow</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/java/">java</a><span class="tag-list-count">5</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/memory/">memory</a><span class="tag-list-count">5</span></li></ul>
         </div>
     </div>
 
@@ -446,7 +465,7 @@
     <div class="widget-wrap">
         <h3 class="widget-title">archives</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/10/">October 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/09/">September 2014</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/07/">July 2013</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">September 2017</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/10/">October 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/09/">September 2014</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/07/">July 2013</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 
